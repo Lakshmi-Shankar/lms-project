@@ -29,7 +29,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-  ],
+, "src/components/global/Button.jsx", "src/components/global/Input.jsx", "src/components/global/Footer.jsx", "src/components/layout/NavBar.jsx"  ],
   "exclude": [
     "node_modules"
   ]

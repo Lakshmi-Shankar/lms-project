@@ -1,42 +1,24 @@
 "use client";
 
-import Footer from "../components/layout/Footer";
-import Button from "../components/ui/Button";
-import Input from "../components/ui/Input";
-
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-// app/login/page.js
-export default function LoginPage() {
-    const router = useRouter();
-    return (
-        <div className="flex min-h-screen flex-col justify-between bg-gray-100">
-        {/* Centered Login Box */}
-        <div className="flex flex-1 items-center justify-center">
-            <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-md">
-            <h1 className="mb-6 text-center text-2xl font-bold text-gray-700">
-                Login
-            </h1>
+import DashboardLayout from "../components/layout/Dashboard";
+import Button from "../components/global/Button";
+import Input from "../components/global/Input";
 
-            <form className="space-y-4">
-                {/* Email */}
-                <div>
-                <Input label="Email" type="email" placeholder="Enter your email" />
-                </div>
+export default function Home() {
+  const router = useRouter();
 
-                {/* Password */}
-                <div>
-                <Input label="Password" type="password" placeholder="Enter your password" />
-                </div>
+  // useEffect(() => {
+  //   router.push("/signup");
+  // }, [router]);
 
-                {/* Submit */}
-                <Button onClick={() => router.push("/")}>
-                Login
-                </Button>
-            </form>
-            </div>
-        </div>
-        <Footer />
-        </div>
+  return (
+    <DashboardLayout>
+      <h1 className="text-2xl font-bold mb-4">Welcome to LMS</h1>
+      <Input label="Your Name" placeholder="Enter name" />
+      <Button variant="primary">Submit</Button>
+    </DashboardLayout>
   );
 }
