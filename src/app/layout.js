@@ -1,7 +1,9 @@
+// app/layout.js
 import { Geist, Geist_Mono } from "next/font/google";
 import connectToDatabase from '../../utils/mongodb';
-import User from '../app/models/User';
 import "./globals.css";
+import Providers from "../components/Providers";
+import { Toaster } from 'react-hot-toast'; // <-- import Toaster
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,14 +21,15 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-await connectToDatabase();
-
-  console.log(' User model loaded successfully:', !!User);
+  await connectToDatabase();
 
   return (
     <html lang="en">
       <body>
-        {children}
+        <Providers>
+          {children}
+          <Toaster position="top-right" />  {/* <-- mount Toaster */}
+        </Providers>
       </body>
     </html>
   );

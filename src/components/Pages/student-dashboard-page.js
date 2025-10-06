@@ -18,7 +18,7 @@ const StudentDashboardPage = () => {
     }
   }, [session, status, router]);
 
-  console.log(session?.user); // Submission requirement
+  console.log(session); 
 
   if (status === "loading" || !session || session.user?.role !== "student") {
     return <div className="text-center mt-10 text-black">Loading...</div>;

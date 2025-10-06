@@ -1,136 +1,126 @@
 "use client";
+import React, { useState } from 'react';
+import { signIn, useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
+import Navbar from '../layout/NavBar';
+import InputField from '../global/Input';
+import Button from '../global/Button';
 
-import { useState } from "react";
+const LoginPage = () => {
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-export default function LoginPage() {
-  // State for form data
-  const [formData, setFormData] = useState({ email: "", password: "" });
-
-  // State for errors
-  const [errors, setErrors] = useState({ email: "", password: "", general: "" });
-
-  // Handle input changes
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-
-    // Reset error for this field as user types
-    setErrors({ ...errors, [name]: "" });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // Basic validation
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.email) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Invalid email address";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
-
-    return newErrors;
-  };
-
-  // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+    
+    if (!form.email || !form.password) {
+      toast.error('Email and password are required.');
       return;
     }
-
-    // For now, just log the form values (replace with API or next-auth login later)
-    console.log("Form submitted:", formData);
-
-    if (!response.ok) {
-      setErrors(data.error || 'Registration failed');
-      return;
-    }
-
-    setSuccess(data.message || 'Registration successful! Logging you in...');
-
-    // Optional: Wait for DB consistency
-    await new Promise((res) => setTimeout(res, 500));
-
-    // Automatically sign in the user after registration
-    const signInResponse = await signIn('credentials', {
-      redirect: false,
-      email: form.email,
-      password: form.password,
+    
+    setIsLoading(true);
+    
+    const loadingToast = toast.loading('Signing you in...', {
+      duration: Infinity,
     });
-
-    if (signInResponse?.ok) {
-      if (form.role === 'admin') {
-        router.push('/admin_dashboard');
-      } else {
-        router.push('/student_dashboard');
+    
+    try {
+      const res = await signIn("credentials", { 
+        redirect: false, 
+        email: form.email,
+        password: form.password
+      });
+      
+      if (res?.error) {
+        toast.dismiss(loadingToast);
+        toast.error("Invalid credentials. Please check your email and password.");
+        setIsLoading(false);
+        return;
       }
-    } else {
-      setErrors('Registration succeeded, but automatic login failed. Please sign in manually.');
-    }
+      
+      if (res?.ok) {
+        toast.dismiss(loadingToast);
+        toast.success('Login successful! Redirecting...');
+        setTimeout(async () => {
+          const sessionRes = await fetch('/api/auth/session');
+          const session = await sessionRes.json();
+          const role = session?.user?.role;
 
+          console.log(">>>")
+          console.log(role)
+          
+          if (role === 'admin') {
+            router.push('/admin_dashboard');
+            console.log("..")
+          } else if (role === 'student') {
+            router.push('/student_dashboard');
+            console.log(".")
+          } else {
+            console.log(session);
+          }
+        }, 100);
+      }
+    } catch (err) {
+      toast.dismiss(loadingToast);
+      toast.error("An unexpected error occurred. Please try again.");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-md">
-        <h1 className="mb-6 text-center text-2xl font-bold text-gray-700">Login</h1>
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              name="email"
-              placeholder="Enter your email"
-              value={formData.email}
-              onChange={handleChange}
-              className={`mt-1 w-full rounded-lg border p-2 focus:outline-none ${
-                errors.email
-                  ? "border-red-500 text-red-600"
-                  : "border-gray-300 text-gray-700 focus:border-blue-500"
-              }`}
-            />
-            {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+    <>
+      <Navbar />
+      <div className="max-w-md mx-auto mt-16 bg-white">
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md">
+          <h2 className="text-2xl text-black font-bold mb-6 text-center">Sign In</h2>
+          
+          <InputField
+            label="Email"
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={handleChange}
+            placeholder="Enter your email"
+            disabled={isLoading}
+            required
+          />
+          <InputField
+            label="Password"
+            name="password"
+            type="password"
+            value={form.password}
+            onChange={handleChange}
+            placeholder="Enter your password"
+            disabled={isLoading}
+            required
+          />
+          
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? 'Signing in...' : 'Sign In'}
+          </Button>
+          
+          <div className="mt-4 text-center text-sm text-gray-600">
+            Don&apos;t have an account?{' '}
+            <button
+              type="button"
+              onClick={() => router.push('/signup')}
+              className="text-blue-600 hover:text-blue-800 underline"
+            >
+              Sign Up
+            </button>
           </div>
-
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={handleChange}
-              className={`mt-1 w-full rounded-lg border p-2 focus:outline-none ${
-                errors.password
-                  ? "border-red-500 text-red-600"
-                  : "border-gray-300 text-gray-700 focus:border-blue-500"
-              }`}
-            />
-            {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
-          </div>
-
-          {/* General error */}
-          {errors.general && <p className="text-sm text-red-500">{errors.general}</p>}
-
-          {/* Submit */}
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-blue-600 p-2 text-white hover:bg-blue-700 transition"
-          >
-            Login
-          </button>
         </form>
       </div>
-    </div>
+    </>
   );
-}
+};
+
+export default LoginPage;

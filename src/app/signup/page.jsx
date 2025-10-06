@@ -1,6 +1,8 @@
-"use client"
+"use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
+import toast from 'react-hot-toast';
 import Navbar from '../../components/layout/NavBar';
 import InputField from '../../components/global/Input';
 import Button from '../../components/global/Button';
@@ -12,28 +14,26 @@ const SignupPage = () => {
     name: '', 
     role: 'student' 
   });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setError('');
-    setSuccess('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     
     if (!form.email || !form.password || !form.name || !form.role) {
-      setError('All fields are required.');
+      toast.error('All fields are required.');
       return;
     }
     
     setIsLoading(true);
+  
+    const loadingToast = toast.loading('Creating your account...', {
+      duration: Infinity,
+    });
     
     try {
       const response = await fetch('/api/register', {
@@ -47,19 +47,38 @@ const SignupPage = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Registration failed');
+        toast.dismiss(loadingToast);
+        toast.error(data.error || 'Registration failed. Please try again.');
         return;
       }
 
-      setSuccess('Registration successful! Redirecting to login...');
-      
-      // Redirect to login page after 2 seconds
-      setTimeout(() => {
-        router.push('/signin');
-      }, 2000);
+      toast.dismiss(loadingToast);
+      const loginToast = toast.loading('Registration successful! Logging you in...', {
+        duration: Infinity,
+      });
+
+      const signInResponse = await signIn('credentials', {
+        redirect: false,
+        email: form.email,
+        password: form.password,
+      });
+
+      if (signInResponse?.ok) {
+        toast.dismiss(loginToast);
+        toast.success(`Welcome ${form.name}! Redirecting to your dashboard...`);
+        if (form.role === 'admin') {
+          router.push('/admin_dashboard');
+        } else {
+          router.push('/student_dashboard');
+        }
+      } else {
+        toast.dismiss(loginToast);
+        toast.error('Registration succeeded, but automatic login failed. Please sign in manually.');
+      }
 
     } catch (err) {
-      setError('An unexpected error occurred.');
+      toast.dismiss(loadingToast);
+      toast.error('An unexpected error occurred. Please try again.');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -72,18 +91,6 @@ const SignupPage = () => {
       <div className="max-w-md mx-auto mt-16 bg-white">
         <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md">
           <h2 className="text-2xl text-black font-bold mb-6 text-center">Sign Up</h2>
-          
-          {error && (
-            <div className="mb-4 text-red-600 text-center text-sm" role="alert">
-              {error}
-            </div>
-          )}
-          
-          {success && (
-            <div className="mb-4 text-green-600 text-center text-sm" role="alert">
-              {success}
-            </div>
-          )}
           
           <InputField
             label="Full Name"
@@ -156,4 +163,4 @@ const SignupPage = () => {
   );
 };
 
-export default SignupPage; 
+export default SignupPage;

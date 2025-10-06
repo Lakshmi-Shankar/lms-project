@@ -1,8 +1,11 @@
-/* These styles will be applied globally */
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+/* Import Tailwind layers */
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
+/* ======================
+   Theme Variables
+   ====================== */
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -10,33 +13,38 @@
   --form-foreground: #171717;
 }
 
-/* Dark mode styles */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #eeeeee;
     --foreground: #ededed;
-    --form-background: #ffffff;
+    --form-background: #171717; /* Dark form */
     --form-foreground: #ededed;
   }
 }
 
-/* Base styles */
+/* ======================
+   Base Styles
+   ====================== */
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   margin: 0;
   min-height: 100vh;
+  line-height: 1.5; /* better readability */
 }
 
-/* Form styles */
+/* ======================
+   Form Styles
+   ====================== */
 form {
-  background: var(--form-background);
+  background-color: var(--form-background);
   color: var(--form-foreground);
   padding: 2rem;
   border-radius: 1rem;
-  box-shadow: 4px 4px rgba(0,0,0,1);
   width: 100%;
   max-width: 400px;
-  margin: 0 auto;
+  margin: 2rem auto; /* adds top spacing */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); /* softer shadow */
+  transition: background-color 0.3s, color 0.3s;
 }
