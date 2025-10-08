@@ -2,7 +2,7 @@
 import { getServerSession } from 'next-auth/next';
 import { redirect } from 'next/navigation';
 import AdminDashboardPageComponent from "../../components/Pages/Student-Dashboard";
-import { authOptions } from '../api/auth/[...nextauth]/route';
+import authOptions from '../../../utils/authOptions';
 
 export default async function AdminDashboardPage() {
 
