@@ -1,7 +1,7 @@
-import Navbar from "../layout/NavBar";
-import Footer from "../layout/Footer";
+import Navbar from "./NavBar";
+import Footer from "./Footer";
 
-const DashboardLayout = ({ children }) => {
+const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -12,3 +12,6 @@ const DashboardLayout = ({ children }) => {
 };
 
 export default DashboardLayout;
+
+
+
